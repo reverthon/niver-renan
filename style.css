@@ -75,10 +75,7 @@ body {
     color: #aaa;
     line-height: 2;
 }
-/* Aparece somente em mobile portrait */
-@media (orientation: portrait) and (hover: none) and (pointer: coarse) {
-    #rotate-overlay { display: flex; }
-}
+/* Visibilidade controlada por JavaScript */
 
 /* ---- BOTÃO DE PULO MOBILE ---- */
 #jump-btn {

@@ -46,10 +46,12 @@ let particles  = [];
 let clouds     = [];
 let bgDecor    = [];
 let obstacles  = [];
-let nextObs      = 90;      // frames até próximo obstáculo
-let invincible       = false;  // invulnerabilidade após fase nova
-let transitioning    = false;  // bloqueia spawn e score durante transição/contagem
-let birthdayLaunched = false;  // guard para não chamar launchBirthday() mais de uma vez
+let nextObs          = 90;
+let invincible       = false;
+let transitioning    = false;
+let birthdayLaunched = false;
+let lastTimestamp    = 0;
+let DT               = 1;   // delta time scale: 1 = 60fps, 2 = 30fps, etc.
 
 // ---- DIMENSIONS (preenchidos em resize) ----
 let W, H, groundY;
@@ -139,7 +141,7 @@ function buildClouds() {
 
 function updateClouds() {
     clouds.forEach(c => {
-        c.x -= c.spd * (gameSpeed / BASE_SPEED);
+        c.x -= c.spd * (gameSpeed / BASE_SPEED) * DT;
         if (c.x + c.w < 0) {
             c.x = W + 10;
             c.y = 20 + Math.random() * (groundY * 0.38);
@@ -174,7 +176,7 @@ function buildBgDecor() {
 
 function updateBgDecor() {
     bgDecor.forEach(d => {
-        d.x -= (gameSpeed * 0.15);
+        d.x -= (gameSpeed * 0.15) * DT;
         if (d.x < -120) {
             d.x = W + Math.random() * 80;
             d.phase = phaseIdx;
@@ -650,10 +652,10 @@ function spawnParticles(x, y, color, count) {
 function updateParticles() {
     particles = particles.filter(p => p.alpha > 0.02);
     particles.forEach(p => {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.18;
-        p.alpha -= 0.03 / p.life;
+        p.x += p.vx * DT;
+        p.y += p.vy * DT;
+        p.vy += 0.18 * DT;
+        p.alpha -= (0.03 / p.life) * DT;
     });
 }
 
@@ -673,11 +675,11 @@ function updateScore() {
     // Score e velocidade pausam durante transição/contagem — sem "skip" de fase acidental
     if (transitioning) return;
 
-    score += 1;
-    scoreEl.textContent = score;
+    score += DT;
+    scoreEl.textContent = Math.floor(score);
     if (score > hiScore) {
         hiScore = score;
-        hiScoreEl.textContent = 'REC: ' + hiScore;
+        hiScoreEl.textContent = 'REC: ' + Math.floor(hiScore);
     }
 
     // Velocidade sobe com o progresso real (score), não com o tempo de tela
@@ -782,11 +784,11 @@ function spawnObstacle() {
 }
 
 function updateObstacles() {
-    obstacles.forEach(ob => { ob.x -= gameSpeed; });
+    obstacles.forEach(ob => { ob.x -= gameSpeed * DT; });
     obstacles = obstacles.filter(ob => ob.x + ob.w > -10);
 
     if (!transitioning) {
-        nextObs--;
+        nextObs -= DT;
         if (nextObs <= 0) spawnObstacle();
     }
 }
@@ -820,14 +822,13 @@ function checkCollision() {
 //  PLAYER UPDATE
 // ============================================================
 function updatePlayer() {
-    // Gravidade
-    P.vy += GRAVITY;
-    P.y  += P.vy;
+    // Gravidade com delta time
+    P.vy += GRAVITY * DT;
+    P.y  += P.vy * DT;
 
     // Chão
     if (P.y >= groundY - P.h) {
         if (P.vy > 3) {
-            // aterrissar: efeito squish
             P.squishY = 0.75;
             spawnParticles(P.x, groundY, PHASES[phaseIdx].groundG, 4);
         }
@@ -839,11 +840,11 @@ function updatePlayer() {
     }
 
     // Recupera squish
-    P.squishY += (1 - P.squishY) * 0.25;
+    P.squishY += (1 - P.squishY) * 0.25 * DT;
 
     // Animação das pernas
     if (P.onGround) {
-        P.legTimer++;
+        P.legTimer += DT;
         if (P.legTimer >= 7) {
             P.legTimer = 0;
             P.legPhase = (P.legPhase + 0.8) % (Math.PI * 2);
@@ -1138,6 +1139,8 @@ function startGame() {
     invincible       = false;
     transitioning    = false;
     birthdayLaunched = false;
+    lastTimestamp    = 0;
+    DT               = 1;
 
     P.y  = groundY - P.h;
     P.vy = 0;
@@ -1163,7 +1166,10 @@ function startGame() {
 // ============================================================
 //  MAIN LOOP
 // ============================================================
-function loop() {
+function loop(timestamp) {
+    // Delta time: normaliza para 60fps — garante velocidade igual em qualquer dispositivo
+    DT = lastTimestamp ? Math.min((timestamp - lastTimestamp) / (1000 / 60), 4) : 1;
+    lastTimestamp = timestamp;
     frameCount++;
 
     ctx.clearRect(0, 0, W, H);
@@ -1179,19 +1185,16 @@ function loop() {
         if (checkCollision()) triggerGameOver();
     }
 
-    // Desenha sempre (para tela de espera e morte)
     if (state !== S.BDAY) {
         drawBackground();
         drawParticles();
         obstacles.forEach(drawObstacle);
         drawPlayer();
 
-        // Tela de start: player animado em idle
         if (state === S.START) {
-            P.legPhase += 0.08;
+            P.legPhase += 0.08 * DT;
         }
 
-        // Dust ao correr
         if (state === S.PLAYING && P.onGround && frameCount % 8 === 0) {
             spawnParticles(P.x - P.w * 0.5, groundY - 4, PHASES[phaseIdx].groundG, 2);
         }
@@ -1239,9 +1242,21 @@ jumpBtn.addEventListener('mousedown', e => {
 });
 
 // ============================================================
+//  ROTATE OVERLAY — detecção JS (mais confiável que media query)
+// ============================================================
+const rotateOverlay = document.getElementById('rotate-overlay');
+
+function checkOrientation() {
+    const isTouch   = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
+    const isPortrait = window.innerHeight > window.innerWidth;
+    rotateOverlay.style.display = (isTouch && isPortrait) ? 'flex' : 'none';
+}
+
+// ============================================================
 //  INIT
 // ============================================================
 window.addEventListener('resize', () => {
+    checkOrientation();
     resize();
     if (state === S.BDAY) {
         const bc = document.getElementById('birthday-canvas');
@@ -1250,9 +1265,11 @@ window.addEventListener('resize', () => {
     }
 });
 
+window.addEventListener('orientationchange', checkOrientation);
+
 window.addEventListener('load', () => {
+    checkOrientation();
     resize();
-    // Player começa na posição de espera
     P.y = groundY - P.h;
     loop();
 });
