@@ -1174,17 +1174,13 @@ function startGame() {
 // ============================================================
 //  MAIN LOOP
 // ============================================================
-const _isMobile = navigator.maxTouchPoints > 0;
-
 function loop(ts) {
-    const elapsed = (ts && _lastTs) ? ts - _lastTs : 16.67;
-    if (elapsed > 18) {
-        DT = Math.min(elapsed / 16.67, 3); // frame lento: compensa proporcionalmente
-    } else if (_isMobile) {
-        DT = 2; // mobile 60fps: aplica 2x para igualar desktop 120Hz
-    } else {
-        DT = 1; // desktop: comportamento original intocado
-    }
+    // Baseline = 1000/180fps = 5.56ms (fps real do desktop detectado)
+    // Desktop 180fps: DT=1 (idêntico ao original)
+    // Mobile 60fps:   DT=3 (iguala 504px/s do desktop)
+    // Mobile 30fps:   DT=6→cap 4 (próximo o suficiente)
+    const elapsed = (ts && _lastTs) ? ts - _lastTs : 5.56;
+    DT = Math.min(elapsed / 5.56, 4);
     _lastTs = ts || _lastTs;
     frameCount++;
 
