@@ -50,7 +50,6 @@ let nextObs          = 90;
 let invincible       = false;
 let transitioning    = false;
 let birthdayLaunched = false;
-    lastFrame = 0; DT = 1;
 let lastFrame = 0;
 let DT = 1;
 
