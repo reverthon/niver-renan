@@ -1265,35 +1265,9 @@ jumpBtn.addEventListener('mousedown', e => {
 });
 
 // ============================================================
-//  ROTATE OVERLAY — detecção JS (mais confiável que media query)
-// ============================================================
-const rotateOverlay = document.getElementById('rotate-overlay');
-
-function checkOrientation() {
-    const isTouch    = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
-    const isPortrait = window.innerHeight > window.innerWidth;
-    if (!isTouch || !isPortrait) {
-        rotateOverlay.style.display = 'none';
-        return;
-    }
-    // Mobile em portrait: mostra overlay 2s depois tenta travar em landscape
-    rotateOverlay.style.display = 'flex';
-    setTimeout(() => {
-        if (screen.orientation && screen.orientation.lock) {
-            screen.orientation.lock('landscape').then(() => {
-                rotateOverlay.style.display = 'none';
-            }).catch(() => {
-                // iOS não suporta lock — mantém overlay até o usuário girar
-            });
-        }
-    }, 2000);
-}
-
-// ============================================================
 //  INIT
 // ============================================================
 window.addEventListener('resize', () => {
-    checkOrientation();
     resize();
     if (state === S.BDAY) {
         const bc = document.getElementById('birthday-canvas');
@@ -1302,10 +1276,7 @@ window.addEventListener('resize', () => {
     }
 });
 
-window.addEventListener('orientationchange', checkOrientation);
-
 window.addEventListener('load', () => {
-    checkOrientation();
     resize();
     P.y = groundY - P.h;
     loop();
