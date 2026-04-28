@@ -877,6 +877,7 @@ function jump() {
 // ============================================================
 function triggerGameOver() {
     state = S.DEAD;
+    stopBgMusic();
     soundHit();
 
     // Partículas de colisão
@@ -1119,6 +1120,49 @@ function soundGo() {
     tone(1174, 'square', 0.10, 0.22, 0.13);
 }
 
+// ---- MÚSICA DE FUNDO (lookahead scheduler — loop sem falha) ----
+let _bgActive   = false;
+let _bgIdx      = 0;
+let _bgNextTime = 0;
+const _BPM = 0.10; // duração de 1 beat em segundos (~150bpm)
+
+// Melodia estilo Mario — loop de 8 compassos
+const _BG = [
+    // [freq_hz, beats]  0 = silêncio
+    [659,1],[659,1],[0,1],[659,1],[0,1],[523,1],[659,1],[0,1],
+    [784,2],[0,2],[392,2],[0,2],
+    [523,1],[0,2],[392,1],[0,2],[330,2],[0,1],
+    [440,1],[0,0.5],[494,1],[0,0.5],[466,0.5],[440,1],[0,1],
+    [392,1],[659,1],[784,1],[880,1],[698,1],[784,1],[0,0.5],
+    [659,1],[0,0.5],[523,1],[0,0.5],[587,1],[494,1.5],[0,0.5],
+    [523,1],[0,1],[392,1],[0,1],[330,2],[0,2],
+    [392,1],[523,1],[659,1],[523,1],[392,1],[523,1],[0,2],
+];
+
+function _bgSchedule() {
+    if (!_bgActive) return;
+    const a = getAC();
+    while (_bgNextTime < a.currentTime + 0.35) {
+        const [freq, dur] = _BG[_bgIdx];
+        const durSec = dur * _BPM;
+        if (freq > 0) tone(freq, 'square', durSec * 0.78, 0.07, _bgNextTime - a.currentTime);
+        _bgNextTime += durSec;
+        _bgIdx = (_bgIdx + 1) % _BG.length;
+    }
+    setTimeout(_bgSchedule, 100);
+}
+
+function startBgMusic() {
+    if (_bgActive) return;
+    ensureAudio();
+    _bgActive   = true;
+    _bgIdx      = 0;
+    _bgNextTime = getAC().currentTime + 0.05;
+    _bgSchedule();
+}
+
+function stopBgMusic() { _bgActive = false; }
+
 function soundBirthday() {
     // "Parabéns pra você" (melodia simplificada em Sol maior)
     // G G A G C B | G G A G D C | G G G' E C B A | F F E C D C
@@ -1157,6 +1201,7 @@ function startGame() {
     P.legPhase = 0;
 
     state = S.PLAYING;
+    startBgMusic();
     startScreen.classList.add('hidden');
     gameoverScreen.classList.add('hidden');
     birthdayScreen.classList.add('hidden');
@@ -1230,17 +1275,22 @@ window.addEventListener('touchstart', e => {
     jump();
 }, { passive: false });
 
-btnRestart.addEventListener('click', () => {
+function doRestart() {
     gameoverScreen.classList.add('hidden');
     startGame();
-});
+}
+btnRestart.addEventListener('click', doRestart);
+btnRestart.addEventListener('touchend', e => { e.preventDefault(); e.stopPropagation(); doRestart(); });
 
-btnPlayAgain.addEventListener('click', () => {
+function doPlayAgain() {
+    stopBgMusic();
     birthdayScreen.classList.add('hidden');
     state = S.START;
     startScreen.classList.remove('hidden');
     hudEl.classList.add('hidden');
-});
+}
+btnPlayAgain.addEventListener('click', doPlayAgain);
+btnPlayAgain.addEventListener('touchend', e => { e.preventDefault(); e.stopPropagation(); doPlayAgain(); });
 
 // Botão de pulo mobile — disparo via touch e click (fallback desktop)
 const jumpBtn = document.getElementById('jump-btn');
