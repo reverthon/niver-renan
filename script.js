@@ -1231,6 +1231,7 @@ document.addEventListener('keydown', e => {
 });
 
 window.addEventListener('touchstart', e => {
+    if (e.target.closest('button')) return; // deixa botões funcionarem normalmente
     e.preventDefault();
     jump();
 }, { passive: false });
