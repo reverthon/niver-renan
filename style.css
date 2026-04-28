@@ -149,10 +149,44 @@ body {
     color: #7FDBFF;
     margin-top: 8px;
 }
-.rotate-hint {
-    font-size: clamp(4px, 1vw, 8px);
-    color: #888;
-    margin-top: 8px;
+
+/* ---- OVERLAY ROTAÇÃO MOBILE ---- */
+#rotate-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #0f0f1a;
+    z-index: 999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    text-align: center;
+    padding: 24px;
+}
+.rotate-icon {
+    font-size: 56px;
+    animation: phoneRotate 1.8s ease-in-out infinite;
+    display: block;
+}
+@keyframes phoneRotate {
+    0%   { transform: rotate(0deg);  }
+    35%  { transform: rotate(90deg); }
+    65%  { transform: rotate(90deg); }
+    100% { transform: rotate(0deg);  }
+}
+.rotate-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(10px, 3vw, 16px);
+    color: #FFD700;
+    text-shadow: 2px 2px 0 #8B6500;
+    letter-spacing: 2px;
+}
+.rotate-sub {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(7px, 2vw, 10px);
+    color: #aaa;
+    line-height: 2;
 }
 
 .go-info {

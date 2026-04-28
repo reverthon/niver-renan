@@ -1265,9 +1265,21 @@ jumpBtn.addEventListener('mousedown', e => {
 });
 
 // ============================================================
+//  ROTATE OVERLAY
+// ============================================================
+const rotateOverlay = document.getElementById('rotate-overlay');
+
+function checkOrientation() {
+    const isTouch    = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
+    const isPortrait = window.innerHeight > window.innerWidth;
+    rotateOverlay.style.display = (isTouch && isPortrait) ? 'flex' : 'none';
+}
+
+// ============================================================
 //  INIT
 // ============================================================
 window.addEventListener('resize', () => {
+    checkOrientation();
     resize();
     if (state === S.BDAY) {
         const bc = document.getElementById('birthday-canvas');
@@ -1276,7 +1288,10 @@ window.addEventListener('resize', () => {
     }
 });
 
+window.addEventListener('orientationchange', checkOrientation);
+
 window.addEventListener('load', () => {
+    checkOrientation();
     resize();
     P.y = groundY - P.h;
     loop();
