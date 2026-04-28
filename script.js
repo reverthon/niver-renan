@@ -1167,7 +1167,11 @@ function startGame() {
 //  MAIN LOOP
 // ============================================================
 function loop(ts) {
-    DT = (_lastTs && ts) ? Math.min((ts - _lastTs) / 16.67, 3) : 1;
+    const elapsed = (ts && _lastTs) ? ts - _lastTs : 16.67;
+    // Só compensa se o frame for mais lento que 60fps (~16.67ms)
+    // Desktop 120Hz (~8ms): DT=1, comportamento idêntico ao original
+    // Mobile 30fps (~33ms): DT=2, velocidade compensada
+    DT = elapsed > 18 ? Math.min(elapsed / 16.67, 3) : 1;
     _lastTs = ts || _lastTs;
     frameCount++;
 
