@@ -884,7 +884,7 @@ function triggerGameOver() {
     for (let i = 0; i < 18; i++)
         spawnParticles(P.x, P.y + P.h/2, '#FF4444', 1);
 
-    goScoreText.textContent = 'Pontuação: ' + score;
+    goScoreText.textContent = 'Pontuação: ' + Math.floor(score);
     goPhaseText.textContent  = 'Fase: ' + PHASES[phaseIdx].name;
 
     setTimeout(() => {
