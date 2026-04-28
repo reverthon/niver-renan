@@ -26,8 +26,8 @@ const btnPlayAgain   = document.getElementById('btn-play-again');
 // ---- CONSTANTS ----
 const GRAVITY      = 0.6;
 const JUMP_FORCE   = -14;
-const BASE_SPEED   = 2.8;
-const MAX_SPEED    = 4.8;
+const BASE_SPEED   = 5.5;
+const MAX_SPEED    = 8.0;
 // Limiares de fase — cada fase dura ~40-50 s de jogo real (score pausa na transição)
 const PHASE_THRESHOLDS = [2100, 3900]; // score para avançar fase 0→1 e 1→2  (~35s / ~30s / ~30s)
 const BIRTHDAY_SCORE   = 6000;         // score para tela de aniversário (~35s fase 3)
