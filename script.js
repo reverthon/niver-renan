@@ -1090,9 +1090,17 @@ function soundJump() {
 }
 
 function soundHit() {
-    tone(200, 'sawtooth', 0.07, 0.4);
-    tone(130, 'sawtooth', 0.13, 0.3, 0.07);
-    tone(70,  'sawtooth', 0.18, 0.2, 0.20);
+    // Jingle de morte estilo Mario (sequência descendente característica)
+    const notes = [
+        [494, 0.08], [370, 0.08], [370, 0.08],
+        [349, 0.08], [311, 0.08], [294, 0.08],
+        [277, 0.08], [262, 0.08], [247, 0.12],
+    ];
+    let t = 0;
+    notes.forEach(([f, d]) => {
+        tone(f, 'square', d, 0.28, t);
+        t += d + 0.01;
+    });
 }
 
 function soundPhaseIntro() {
