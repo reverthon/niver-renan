@@ -1169,11 +1169,8 @@ function startGame() {
 //  MAIN LOOP
 // ============================================================
 function loop(ts) {
-    if (!lastFrame) lastFrame = ts;
-
     const elapsed = ts - lastFrame;
-
-    DT = Math.min(elapsed / 16.67, 2);
+    DT = lastFrame ? Math.min(elapsed / 16.67, 2) : 1;
     lastFrame = ts;
     frameCount++;
 
