@@ -1169,10 +1169,11 @@ function startGame() {
 //  MAIN LOOP
 // ============================================================
 function loop(ts) {
-    // Frame cap 60fps no desktop; DT compensa mobile abaixo de 60fps
+    if (!lastFrame) lastFrame = ts;
+
     const elapsed = ts - lastFrame;
-    if (elapsed < 15) { requestAnimationFrame(loop); return; }
-    DT = Math.min(elapsed / (1000 / 60), 3);
+
+    DT = Math.min(elapsed / 16.67, 2);
     lastFrame = ts;
     frameCount++;
 
