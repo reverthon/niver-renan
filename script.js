@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 //  CHECKPOINT 22 — A Jornada de Renan
 //  Endless Runner — presente de aniversário 28/04/2026
 // ============================================================
@@ -26,8 +26,8 @@ const btnPlayAgain   = document.getElementById('btn-play-again');
 // ---- CONSTANTS ----
 const GRAVITY      = 0.6;
 const JUMP_FORCE   = -14;
-const BASE_SPEED   = 5.5;
-const MAX_SPEED    = 8.0;
+const BASE_SPEED   = 2.8;
+const MAX_SPEED    = 4.8;
 // Limiares de fase — cada fase dura ~40-50 s de jogo real (score pausa na transição)
 const PHASE_THRESHOLDS = [2100, 3900]; // score para avançar fase 0→1 e 1→2  (~35s / ~30s / ~30s)
 const BIRTHDAY_SCORE   = 6000;         // score para tela de aniversário (~35s fase 3)
@@ -50,8 +50,6 @@ let nextObs          = 90;
 let invincible       = false;
 let transitioning    = false;
 let birthdayLaunched = false;
-let lastTimestamp    = 0;
-let DT               = 1;   // delta time scale: 1 = 60fps, 2 = 30fps, etc.
 
 // ---- DIMENSIONS (preenchidos em resize) ----
 let W, H, groundY;
@@ -141,7 +139,7 @@ function buildClouds() {
 
 function updateClouds() {
     clouds.forEach(c => {
-        c.x -= c.spd * (gameSpeed / BASE_SPEED) * DT;
+        c.x -= c.spd * (gameSpeed / BASE_SPEED);
         if (c.x + c.w < 0) {
             c.x = W + 10;
             c.y = 20 + Math.random() * (groundY * 0.38);
@@ -176,7 +174,7 @@ function buildBgDecor() {
 
 function updateBgDecor() {
     bgDecor.forEach(d => {
-        d.x -= (gameSpeed * 0.15) * DT;
+        d.x -= (gameSpeed * 0.15);
         if (d.x < -120) {
             d.x = W + Math.random() * 80;
             d.phase = phaseIdx;
@@ -652,10 +650,10 @@ function spawnParticles(x, y, color, count) {
 function updateParticles() {
     particles = particles.filter(p => p.alpha > 0.02);
     particles.forEach(p => {
-        p.x += p.vx * DT;
-        p.y += p.vy * DT;
-        p.vy += 0.18 * DT;
-        p.alpha -= (0.03 / p.life) * DT;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.18;
+        p.alpha -= (0.03 / p.life);
     });
 }
 
@@ -675,11 +673,11 @@ function updateScore() {
     // Score e velocidade pausam durante transição/contagem — sem "skip" de fase acidental
     if (transitioning) return;
 
-    score += DT;
-    scoreEl.textContent = Math.floor(score);
+    score += 1;
+    scoreEl.textContent = score;
     if (score > hiScore) {
         hiScore = score;
-        hiScoreEl.textContent = 'REC: ' + Math.floor(hiScore);
+        hiScoreEl.textContent = 'REC: ' + hiScore;
     }
 
     // Velocidade sobe com o progresso real (score), não com o tempo de tela
@@ -784,11 +782,11 @@ function spawnObstacle() {
 }
 
 function updateObstacles() {
-    obstacles.forEach(ob => { ob.x -= gameSpeed * DT; });
+    obstacles.forEach(ob => { ob.x -= gameSpeed; });
     obstacles = obstacles.filter(ob => ob.x + ob.w > -10);
 
     if (!transitioning) {
-        nextObs -= DT;
+        nextObs--;
         if (nextObs <= 0) spawnObstacle();
     }
 }
@@ -823,8 +821,8 @@ function checkCollision() {
 // ============================================================
 function updatePlayer() {
     // Gravidade com delta time
-    P.vy += GRAVITY * DT;
-    P.y  += P.vy * DT;
+    P.vy += GRAVITY;
+    P.y  += P.vy;
 
     // Chão
     if (P.y >= groundY - P.h) {
@@ -840,11 +838,11 @@ function updatePlayer() {
     }
 
     // Recupera squish
-    P.squishY += (1 - P.squishY) * 0.25 * DT;
+    P.squishY += (1 - P.squishY) * 0.25;
 
     // Animação das pernas
     if (P.onGround) {
-        P.legTimer += DT;
+        P.legTimer++;
         if (P.legTimer >= 7) {
             P.legTimer = 0;
             P.legPhase = (P.legPhase + 0.8) % (Math.PI * 2);
@@ -1139,9 +1137,6 @@ function startGame() {
     invincible       = false;
     transitioning    = false;
     birthdayLaunched = false;
-    lastTimestamp    = 0;
-    DT               = 1;
-
     P.y  = groundY - P.h;
     P.vy = 0;
     P.onGround = true;
@@ -1166,11 +1161,8 @@ function startGame() {
 // ============================================================
 //  MAIN LOOP
 // ============================================================
-function loop(timestamp) {
-    // Delta time: normaliza para 60fps — garante velocidade igual em qualquer dispositivo
-    DT = lastTimestamp ? Math.min((timestamp - lastTimestamp) / (1000 / 60), 4) : 1;
-    lastTimestamp = timestamp;
-    frameCount++;
+function loop() {
+    // Delta time: normaliza para 60fps — garante velocidade igual em qualquer dispositivo    frameCount++;
 
     ctx.clearRect(0, 0, W, H);
 
@@ -1192,7 +1184,7 @@ function loop(timestamp) {
         drawPlayer();
 
         if (state === S.START) {
-            P.legPhase += 0.08 * DT;
+            P.legPhase += 0.08;
         }
 
         if (state === S.PLAYING && P.onGround && frameCount % 8 === 0) {
@@ -1273,3 +1265,5 @@ window.addEventListener('load', () => {
     P.y = groundY - P.h;
     loop();
 });
+
+
