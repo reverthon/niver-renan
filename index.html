@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Checkpoint 22 — A Jornada de Renan</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Overlay de rotação — aparece apenas em mobile portrait -->
+    <div id="rotate-overlay">
+        <div class="rotate-icon">📱</div>
+        <div class="rotate-title">GIRE O CELULAR</div>
+        <div class="rotate-sub">Para melhor experiência,<br>jogue na horizontal!</div>
+    </div>
+
+    <div id="wrapper">
+        <canvas id="canvas"></canvas>
+
+        <!-- HUD durante o jogo -->
+        <div id="hud" class="hidden">
+            <div id="hud-left">
+                <div id="score-display">0</div>
+                <div id="hi-score-display">REC: 0</div>
+            </div>
+            <div id="phase-display">Ensino Médio</div>
+        </div>
+
+        <!-- Tela inicial -->
+        <div id="start-screen" class="overlay">
+            <div class="overlay-box start-box">
+                <div class="pixel-title">CHECKPOINT</div>
+                <div class="pixel-title big">22</div>
+                <div class="subtitle">A Jornada de Renan</div>
+                <div class="blink press-hint">[ ESPAÇO ] ou [ TOQUE ] para começar</div>
+            </div>
+        </div>
+
+        <!-- Tela de game over -->
+        <div id="gameover-screen" class="overlay hidden">
+            <div class="overlay-box">
+                <div class="pixel-title small">FIM DE JOGO</div>
+                <div class="go-info" id="go-score-text"></div>
+                <div class="go-info" id="go-phase-text"></div>
+                <button id="btn-restart" class="pixel-btn">TENTAR NOVAMENTE</button>
+            </div>
+        </div>
+
+        <!-- Tela de fase (anuncio) -->
+        <div id="phase-announce" class="hidden">
+            <div id="phase-announce-name"></div>
+            <div id="phase-announce-sub"></div>
+        </div>
+
+        <!-- Botão de pulo (visível apenas em dispositivos touch) -->
+        <button id="jump-btn" aria-label="Pular">▲</button>
+
+        <!-- Tela de aniversário -->
+        <div id="birthday-screen" class="overlay hidden">
+            <canvas id="birthday-canvas"></canvas>
+            <div id="birthday-content">
+                <div class="bday-emoji">🎂</div>
+                <div class="bday-title">FELIZ ANIVERSÁRIO</div>
+                <div class="bday-name">RENAN!</div>
+                <div class="bday-date">28 / 04 / 2026</div>
+                <div class="bday-msg">
+                    Cada fase que você passou te trouxe até aqui.<br>
+                    Nem sempre foi o caminho mais fácil,<br>
+                    mas foi o que te levou mais perto de quem você quer ser.<br><br>
+                    A sala de aula, os alunos, o seu sonho…<br>
+                    <strong>já fazem parte do seu futuro.</strong><br><br>
+                    Eu te amo, meu irmão!<br>
+                    Tenho muito orgulho de você.
+                </div>
+                <div class="bday-sub">Continua escrevendo essa história linda! 📚✨</div>
+                <button id="btn-play-again" class="pixel-btn gold">JOGAR NOVAMENTE</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
