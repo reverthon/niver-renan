@@ -895,6 +895,8 @@ function triggerGameOver() {
 // ============================================================
 //  BIRTHDAY SCREEN
 // ============================================================
+let bdayMusicInterval = null;
+
 function launchBirthday() {
     state = S.BDAY;
     hudEl.classList.add('hidden');
@@ -902,7 +904,7 @@ function launchBirthday() {
     initBirthdayCanvas();
     setTimeout(() => {
         soundBirthday();
-        setInterval(soundBirthday, 8000); // repete enquanto tela estiver ativa
+        bdayMusicInterval = setInterval(soundBirthday, 8000);
     }, 800);
 }
 
@@ -1244,7 +1246,8 @@ btnRestart.addEventListener('click', doRestart);
 btnRestart.addEventListener('touchend', e => { e.preventDefault(); e.stopPropagation(); doRestart(); });
 
 function doPlayAgain() {
-    stopBgMusic();
+    clearInterval(bdayMusicInterval);
+    bdayMusicInterval = null;
     birthdayScreen.classList.add('hidden');
     state = S.START;
     startScreen.classList.remove('hidden');
