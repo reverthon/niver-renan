@@ -1270,9 +1270,23 @@ jumpBtn.addEventListener('mousedown', e => {
 const rotateOverlay = document.getElementById('rotate-overlay');
 
 function checkOrientation() {
-    const isTouch   = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
+    const isTouch    = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
     const isPortrait = window.innerHeight > window.innerWidth;
-    rotateOverlay.style.display = (isTouch && isPortrait) ? 'flex' : 'none';
+    if (!isTouch || !isPortrait) {
+        rotateOverlay.style.display = 'none';
+        return;
+    }
+    // Mobile em portrait: mostra overlay 2s depois tenta travar em landscape
+    rotateOverlay.style.display = 'flex';
+    setTimeout(() => {
+        if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').then(() => {
+                rotateOverlay.style.display = 'none';
+            }).catch(() => {
+                // iOS não suporta lock — mantém overlay até o usuário girar
+            });
+        }
+    }, 2000);
 }
 
 // ============================================================
